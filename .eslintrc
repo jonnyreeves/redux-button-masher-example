@@ -1,0 +1,11 @@
+{
+  "extends": [ "airbnb", "plugin:import/errors" ],
+  "env": {
+    "mocha": true
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
+  }
+}
