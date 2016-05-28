@@ -1,8 +1,7 @@
-import 'react-addons-test-utils';
+import testUtils from 'react-addons-test-utils';
+import sinon from 'sinon';
 import React from 'react';
 import { assert } from 'chai';
-import { shallow } from 'enzyme';
-
 import { Counter, stateToProps } from './counter';
 
 describe('view/counter.js', () => {
@@ -13,14 +12,40 @@ describe('view/counter.js', () => {
       assert.deepEqual(state, props);
     });
   });
+
   describe('Counter', () => {
-    let dispatched;
-    const dispatchSpy = action => { dispatched = action; };
+    let renderer;
+    let dispatch;
 
-    const wrapper = shallow(<Counter dispatch={dispatchSpy} value="1" />);
-    const decButton = wrapper.find('[data-test-name="dec"]');
-    decButton.simulate('click');
+    beforeEach(() => {
+      dispatch = sinon.spy();
+      renderer = testUtils.createRenderer();
+      renderer.render(<Counter dispatch={dispatch} value={1} />);
+    });
 
-    assert.deepEqual(dispatched, { type: 'lemon' });
+    // note: enzyme is a better fit for most projects.
+    function simulateClick(testName) {
+      const output = renderer.getRenderOutput();
+      let target;
+      for (let i = 0; i < output.props.children.length; i++) {
+        const child = output.props.children[i];
+        if (child.props['data-test-name'] === testName) {
+          target = child;
+        }
+      }
+      if (target) {
+        target.props.onClick();
+      }
+    }
+
+    it('should dispatch an INC action when the increment button is clicked', () => {
+      simulateClick('inc');
+      assert.ok(dispatch.withArgs({ type: 'INC' }).calledOnce);
+    });
+
+    it('should dispatch an DEC action when the decrement button is clicked', () => {
+      simulateClick('dec');
+      assert.ok(dispatch.withArgs({ type: 'DEC' }).calledOnce);
+    });
   });
 });
